@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de PH</title>
+
+  <style>
+  
+   body {
+     font-family: Arial, sans-serif;
+     background-color: #E9F0E9;
+   }
+
+   ul {
+     margin: 10px 0;
+     padding: 0;
+     list-style: none;
+    }
+
+    li {
+      margin-bottom: 5px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #333;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    .garamond-text {
+      font-family: "Consolas", monospace;
+      font-size: 150%;
+      color: #bac4ba;
+    }
+
+   .ph-scale {
+      width: 400px;
+      height: 40px;
+      background-image: linear-gradient(to right, 
+        red, orange, yellow, green, blue, indigo);
+      border: 1px solid #ccc;
+      position: relative;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .ph-bar {
+      width: 10px;
+      height: 40px;
+      background-color: transparent;
+      position: absolute;
+      top: 0;
+    }
+
+    .ph-mark {
+      width: 2px;
+      height: 30px;
+      background-color: black;
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .ph-mark-label {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+    }
+
+   .container {
+     width: 600px;
+     margin: 0 auto;
+     background-color: #F5F5F4;
+     border-radius: 5px;
+     padding: 20px;
+     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+   }
+
+    h1 {
+      color: #3366cc;
+      text-align: center;
+    }
+
+    .acid-selection,
+    .result {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px;
+    }
+
+    .acid-selection label,
+      .result label {
+        margin-bottom: 5px;
+      }
+
+    .acid-selection select,
+    .acid-selection input[type="text"],
+    .result button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .result button {
+      background-color: #3366cc;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .result button:hover {
+      background-color: #2a528e;
+    }
+
+    #result-pH,
+    #result-pOH {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .info-boxes {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .info-box {
+      width: 45%;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+    }
+
+    .footer {
+      background-color: #E9F0E9;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #333;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1><span class="garamond-text">CALCULADORA DE PH</span></h1>
+
+    <div class="acid-selection">
+      <label for="acid">Selecione o ácido:</label>
+        <select id="acid" onchange="updateAcidInfo()">
+          <option value="" disabled selected></option>
+          <option value="1.8e-5">Ácido acético</option>
+          <option value="3.5e-4">Ácido fluorídrico</option>
+          <option value="4.9e-10">Ácido cianídrico</option>
+          <option value="4.3e-4">Ácido nitroso</option>
+          <option value="4.4e-7">Ácido carbônico</option>
+        </select>
+        
+
+      <label for="concentration">Concentração do ácido:</label>
+      <input type="text" id="concentration" placeholder="Exemplo: 1.8e-2 ou 5.4^(-3)">
+    </div>
+
+    <div class="result">
+      <button onclick="calculate()">Calcular PH</button>
+    </div>
+
+    <div class="result">
+      <p id="result-pH">O pH calculado aparecerá aqui.</p>
+    </div>
+
+    <div class="ph-scale">
+      <div class="ph-bar" id="phBar">
+        <div class="ph-mark"></div>
+      </div>
+    </div>
+
+    <div class="info-boxes">
+
+      <div class="info-box">
+        <h2>Informações sobre o ácido</h2>
+        <p>Informações sobre o ácido selecionado aparecerão aqui.</p>
+      </div>
+
+      <div class="info-box">
+        <h2>Utilidade do ácido</h2>
+        <p>Utilidade do ácido selecionado aparecerá aqui.</p>
+      </div>
+
+    </div>
+
+    <div>
+      <p></p>
+    </div>
+
+    <div class="footer">
+      <p>Elaborado por: Graziele T. F. Alves, Gustavo A. Wozniak, Leonardo Stall e Melissa T. Medeiros</p>
+    </div>
+
+  </div>
+
+
+  
+  <script>
+    function updatePH() {
+      var phValue = parseFloat(document.getElementById("result-pH").textContent.split(":")[1]);
+
+      var phBar = document.getElementById("phBar");
+      var phMark = phBar.querySelector(".ph-mark");
+      var phMarkLabel = phBar.querySelector(".ph-mark-label");
+
+      var scaleWidth = 400;
+
+      var markPosition = (phValue / 14) * scaleWidth;
+      phMark.style.left = markPosition + "px";
+
+      // Exibir a marca somente se o valor de pH estiver dentro da faixa válida
+      if (phValue >= 0 && phValue <= 14) {
+        phMark.style.display = "block";
+        phMarkLabel.style.display = "block";
+        phMarkLabel.textContent = phValue.toFixed(2);
+      } else {
+        phMark.style.display = "none";
+        phMarkLabel.style.display = "none";
+      }
+    }
+
+    function calculate() {
+      const acidSelect = document.getElementById("acid");
+      const concentrationInput = document.getElementById("concentration");
+      const resultPH = document.getElementById("result-pH");
+      const resultPOH = document.getElementById("result-pOH");
+
+      const ka = parseFloat(acidSelect.value);
+      const concentration = parseConcentration(concentrationInput.value);
+
+      if (isNaN(ka) || isNaN(concentration)) {
+        resultPH.textContent = "ERRO";
+        resultPOH.textContent = "ERRO";
+        return;
+      }
+
+      // Calcula o pH
+      const p = Math.sqrt(ka * concentration);
+      const pH = -Math.log10(p);
+
+      // Calcula o pOH
+      const pOH = 14 - pH;
+
+      // Exibir o resultado na interface
+      resultPH.textContent = `O pH calculado é: ${pH.toFixed(2)}`;
+
+      updatePH();
+    }
+
+    function parseConcentration(concentrationStr) {
+      try {
+        // Tenta avaliar a expressão da concentração, permitindo expoente usando "e" ou "^"
+        return eval(concentrationStr.replace("^", "**"));
+      } catch (error) {
+        return NaN;
+      }
+    }
+
+    function updateAcidInfo() {
+      const acidSelect = document.getElementById("acid");
+      const selectedOption = acidSelect.options[acidSelect.selectedIndex].text;
+
+      const infoBox = document.querySelector(".info-boxes .info-box:first-child p");
+      const utilidadeBox = document.querySelector(".info-boxes .info-box:last-child p");
+
+      switch (selectedOption) {
+        case "Ácido acético":
+          infoBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Fórmula química: HAc (CH3COOH);</li>" +
+            "<li>Principal componente do vinagre;</li>" +
+            "<li>Produzido através da fermentação do álcool etanol por bactérias do gênero Acetobacter;</li>" +
+            "<li>Também é amplamente utilizado na indústria química para produzir acetato de vinila, um componente essencial para a fabricação de plásticos;</li>" +
+            "</ul>";
+          utilidadeBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Processo de fermentação de alimentos: O ácido acético é produzido naturalmente durante o processo de fermentação de alimentos como o vinagre;</li>" +
+            "<li>Indústria química: É utilizado na fabricação de diversos produtos químicos, como o acetato de etila, que é usado como solvente;</li>" +
+            "<li>Indústria farmacêutica: O ácido acético é utilizado como intermediário em várias sínteses químicas para a produção de medicamentos;</li>" +
+            "<li>Limpeza doméstica: O vinagre, que contém ácido acético, é frequentemente usado como um produto de limpeza natural para remover manchas e desinfetar superfícies;</li>" +
+            "</ul>";
+          break;
+
+        case "Ácido fluorídrico":
+          infoBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Fórmula química: HF;</li>" +
+            "<li>O ácido fluorídrico é um ácido fraco e é a fonte de íons fluoreto (F-) em solução aquosa;</li>" +
+            "<li>Altamente corrosivo e perigoso para a pele, olhos e sistema respiratório, devido à sua capacidade de reagir com o cálcio presente nos tecidos;</li>" +
+            "<li>Único ácido que pode dissolver o vidro, pois reage com os componentes do vidro (dióxido de silício - SiO2) formando hexafluorossilicato de hidrogênio;</li>" +
+            "</ul>";
+          utilidadeBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Gravação e corrosão de vidro: O HF é usado para gravar e corroer vidro, sendo útil para criar padrões e desenhos em vidro e em alguns processos industriais;</li>" +
+            "<li>Indústria eletrônica: O ácido fluorídrico é utilizado para limpar e gravar superfícies de silício e outros materiais semicondutores na fabricação de dispositivos eletrônicos</li>" +
+            "<li>Indústria química: É um reagente importante em diversas sínteses químicas para a obtenção de produtos fluorados;</li>" +
+            "<li>Esmaltes e cerâmicas: É usado na produção de esmaltes e cerâmicas para melhorar suas propriedades e aderência a superfícies;</li>" +
+            "</ul>";
+          break;
+
+          case "Ácido cianídrico":
+          infoBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Fórmula química: HCN;</li>" +
+            "<li>O ácido cianídrico é um ácido fraco e é um gás extremamente tóxico e venenoso;</li>" +
+            "<li>Conhecido historicamente como cianeto de hidrogênio e tem sido usado em algumas ocasiões como um agente químico letal em envenenamentos e execuções;</li>" +
+            "<li>Apesar de sua toxicidade, o cianeto de hidrogênio também tem aplicação industrial, sendo utilizado na produção de plásticos, corantes e pesticidas;</li>" +
+            "</ul>";
+          utilidadeBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Indústria metalúrgica: O ácido cianídrico é utilizado para extrair ouro e prata de minérios metalúrgicos em processos de lixiviação;</li>" +
+            "<li>Indústria de galvanoplastia: É usado na metalurgia para galvanoplastia, ou seja, para revestir objetos de metal com uma fina camada de outro metal mais nobre;</li>" +
+            "<li>Síntese de produtos químicos: O HCN é um importante reagente em várias sínteses químicas, incluindo a produção de plásticos, corantes e produtos farmacêuticos;</li>" +
+            "<li>Produção de pesticidas: O cianeto de hidrogênio é utilizado como matéria-prima na produção de alguns pesticidas agrícolas;</li>" +
+            "</ul>";
+          break;
+
+          case "Ácido nitroso":
+          infoBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Fórmula química: HNO2;</li>" +
+            "<li>O ácido nitroso é um ácido instável que geralmente é preparado in situ e raramente é encontrado em forma pura;</li>" +
+            "<li>O ácido nitroso é usado como agente nitrosante em reações químicas para introduzir grupos nitroso (-NO) em moléculas orgânicas;</li>" +
+            "<li>Uma das aplicações mais conhecidas do ácido nitroso é na preparação de gás hilariante (óxido nitroso), que é usado como um anestésico leve em procedimentos médicos e odontológicos;</li>" +
+            "</ul>";
+          utilidadeBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Síntese orgânica: O ácido nitroso é utilizado como reagente em várias reações químicas para introduzir grupos nitroso (-NO) em moléculas orgânicas;</li>" +
+            "<li>Preservação de alimentos: O ácido nitroso foi usado historicamente como conservante de alimentos, mas esse uso diminuiu devido a preocupações com a segurança e efeitos colaterais;</li>" +
+            "<li>Análise química: É utilizado como agente redutor em análises químicas e determinação de alguns compostos em laboratórios;</li>" +
+            "<li>Tratamento de águas: O ácido nitroso é usado em alguns sistemas de tratamento de águas para remover cloraminas e outros compostos indesejáveis;</li>" +
+            "</ul>";
+          break;
+
+          case "Ácido carbônico":
+          infoBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Fórmula química: H2CO3;</li>" +
+            "<li>O ácido carbônico é um ácido instável que se decompõe facilmente em dióxido de carbono (CO2) e água (H2O);</li>" +
+            "<li>O ácido carbônico desempenha um papel importante no equilíbrio ácido-base em sistemas aquáticos, como oceanos, ajudando a regular o pH dessas águas;</li>" +
+            "<li>É um ácido formado quando o dióxido de carbono (CO2) é dissolvido em água, como no caso das bebidas carbonatadas, como refrigerantes, que têm uma leve acidez devido à presença de ácido carbônico dissolvido;</li>" +
+            "</ul>";
+          utilidadeBox.innerHTML = "<ul class='acid-info'>" +
+            "<li>Bebidas carbonatadas: O ácido carbônico é responsável pela efervescência em refrigerantes e outras bebidas carbonatadas;</li>" +
+            "<li>Equilíbrio ácido-base em sistemas aquáticos: O ácido carbônico desempenha um papel importante na regulação do pH em oceanos e corpos d'água;</li>" +
+            "<li>Indústria de alimentos: É utilizado como aditivo alimentar para conferir acidez e efervescência em alguns alimentos e bebidas;</li>" +
+            "<li>Equilíbrio ácido-base no corpo humano: O ácido carbônico é um componente do sistema tampão bicarbonato presente no sangue humano, que ajuda a manter o pH do corpo em níveis adequados;</li>" +
+            "</ul>";
+          break;
+        
+
+        default:
+          infoBox.textContent = "";
+          utilidadeBox.textContent = "";
+          break;
+      }
+    }
+  </script>
+</body>
+</html>
